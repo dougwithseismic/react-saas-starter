@@ -1,0 +1,30 @@
+{
+  "name": "react-saas-starter",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check-types": "turbo run check-types",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "test": "turbo run test",
+    "verify": "pnpm lint && pnpm check-types && pnpm test && pnpm build",
+    "prepare": "lefthook install",
+    "db:generate": "pnpm --filter @repo/db db:generate",
+    "db:migrate": "pnpm --filter @repo/db db:migrate",
+    "db:studio": "pnpm --filter @repo/db db:studio",
+    "test:e2e": "pnpm --filter @repo/web test:e2e"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "lefthook": "^2.1.14",
+    "turbo": "^2.11.5",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24"
+  }
+}

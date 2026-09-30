@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: starter
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: starter
+    volumes:
+      - starter-production-postgres:/var/lib/postgresql/data
+    networks:
+      default:
+        ipv4_address: 172.29.71.10
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U starter -d starter"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  migrate:
+    build:
+      context: ..
+      dockerfile: deploy/server.Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/server.Dockerfile
+      target: server
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: https://${PUBLIC_HOST:?Set PUBLIC_HOST}
+      APP_ORIGIN: https://${PUBLIC_HOST:?Set PUBLIC_HOST}
+      NODE_ENV: production
+      PORT: 4301
+      TRUSTED_PROXY_IPS: 172.29.71.20
+      LOOPS_API_KEY: ${LOOPS_API_KEY:-}
+      LOOPS_RESET_PASSWORD_TEMPLATE_ID: ${LOOPS_RESET_PASSWORD_TEMPLATE_ID:-}
+      LOOPS_VERIFY_EMAIL_TEMPLATE_ID: ${LOOPS_VERIFY_EMAIL_TEMPLATE_ID:-}
+      LOOPS_INVITATION_TEMPLATE_ID: ${LOOPS_INVITATION_TEMPLATE_ID:-}
+      POSTHOG_PROJECT_KEY: ${POSTHOG_PROJECT_KEY:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-https://us.i.posthog.com}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+      args:
+        VITE_POSTHOG_PROJECT_KEY: ${VITE_POSTHOG_PROJECT_KEY:-}
+        VITE_POSTHOG_HOST: ${VITE_POSTHOG_HOST:-https://us.i.posthog.com}
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?Set PUBLIC_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      default:
+        ipv4_address: 172.29.71.20
+    depends_on:
+      - server
+    restart: unless-stopped
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.29.71.0/24
+volumes:
+  starter-production-postgres:
+  caddy-data:
+  caddy-config:

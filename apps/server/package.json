@@ -1,0 +1,32 @@
+{
+  "name": "@repo/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env dist/index.mjs",
+    "build": "tsdown",
+    "check-types": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.6",
+    "@hono/node-server": "^2.1.3",
+    "@hono/zod-openapi": "^1.6.3",
+    "@repo/contracts": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@scalar/hono-api-reference": "^0.12.6",
+    "better-auth": "^1.7.6",
+    "hono": "^4.13.11",
+    "pino": "^10.3.1",
+    "posthog-node": "^5.54.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsdown": "^0.23.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

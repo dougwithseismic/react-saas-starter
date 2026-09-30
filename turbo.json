@@ -1,0 +1,45 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": ["biome.json"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["VITE_*"],
+      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "lint": {},
+    "test": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["TEST_DATABASE_URL"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "APP_ORIGIN",
+        "PORT",
+        "NODE_ENV",
+        "TRUSTED_PROXY_IPS",
+        "API_URL",
+        "LOG_LEVEL",
+        "LOOPS_API_KEY",
+        "LOOPS_RESET_PASSWORD_TEMPLATE_ID",
+        "LOOPS_VERIFY_EMAIL_TEMPLATE_ID",
+        "LOOPS_INVITATION_TEMPLATE_ID",
+        "POSTHOG_PROJECT_KEY",
+        "POSTHOG_HOST"
+      ]
+    },
+    "@repo/db#build": {
+      "outputs": []
+    }
+  }
+}
