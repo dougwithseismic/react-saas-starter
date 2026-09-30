@@ -1,104 +1,23 @@
 # React SaaS Starter
 
-An account and organisation starter with React, Vite, TypeScript, TanStack Router/Query, Hono, Better Auth, Drizzle and PostgreSQL. It includes sign-in, account settings, sessions, organisations, member roles and invitations. Product features belong in separate feature modules.
+## Copyable setup prompt
 
-## Create an application
-
-This private repository is a GitHub template:
-
-```sh
-gh repo create my-app --private --template dougwithseismic/react-saas-starter --clone
-cd my-app
+```text
+Use this starter to set up [APP NAME] in a new private repository. Configure local development, PostgreSQL, Better Auth, Loops transactional email, PostHog analytics and structured logging. Apply [DESIGN REFERENCE] to the React frontend while preserving the account and organisation flows. Deploy to [HOSTING PROVIDER] at [DOMAIN]. Work through the checklist below, run the database and browser tests, and verify the live account flows. Keep credentials server-side, report missing provider access or configuration, and distinguish tested integrations from live delivery. Keep the scope to accounts and organisations unless I specify product features.
 ```
 
-Then follow local setup and replace the UI tokens and feature screens with your reference design.
+## Setup checklist
 
-## Local setup
-
-Use Node.js 24+, pnpm (the root `packageManager` pins its version), and Docker with Compose.
-
-```sh
-corepack enable
-pnpm install
-cp apps/server/.env.example apps/server/.env
-cp apps/web/.env.example apps/web/.env
-openssl rand -base64 48
-```
-
-Put the generated value in `apps/server/.env` as `BETTER_AUTH_SECRET` before starting. The example PostgreSQL credentials are for local development.
-
-```sh
-docker compose up -d --wait
-DATABASE_URL=postgresql://starter:starter@localhost:5433/starter pnpm db:migrate
-pnpm dev
-```
-
-Open [the sign-in page](http://localhost:4300/sign-in). The SPA runs on port **4300**, the Hono server on **4301**, and local PostgreSQL on **5433**. Browser requests use the frontend origin; Vite proxies `/api`, `/docs`, `/openapi.json` and `/health` to the server. Keep `APP_ORIGIN` and `BETTER_AUTH_URL` at `http://localhost:4300` for local use.
-
-The UI route `/sign-in` renders a form. Its API is `POST /api/auth/sign-in/email`, with JSON `{ "email": "…", "password": "…" }`. Better Auth owns password hashing, session cookies, CSRF checks and authentication endpoints; frontend guards do not replace server authorization. Explore [Scalar](http://localhost:4300/docs) and [OpenAPI](http://localhost:4300/openapi.json).
-
-## Organisation invitations and email
-
-Email uses Loops transactional templates. Set the server-only `LOOPS_API_KEY` and the published template IDs `LOOPS_RESET_PASSWORD_TEMPLATE_ID`, `LOOPS_VERIFY_EMAIL_TEMPLATE_ID` and `LOOPS_INVITATION_TEMPLATE_ID`. The verification template also handles email changes. All templates receive `url` and `name`; the invitation template additionally receives `organizationName`, and its `name` is the inviter’s name. Use `url` as the action link. Transactional sends use `addToAudience: false`, so account emails do not add recipients to a marketing audience. Configure the sender in Loops. Without delivery configured, pending invitation links can be shared manually, but a new recipient still needs a verified email before accepting. Email-dependent operations return an actionable configuration error; no email delivery is simulated.
-
-Owner/admin/member permissions are enforced by Better Auth on the server. PostgreSQL's last-owner migration prevents removing the final owner, including account deletion. Owners must transfer ownership or delete an organisation before deleting their account.
-
-## Logging and analytics
-
-Structured server logs use Pino. Browser and server analytics go through local abstractions with optional PostHog sinks; keys unset means analytics is disabled. Set `POSTHOG_PROJECT_KEY` and `POSTHOG_HOST` on the server, and `VITE_POSTHOG_PROJECT_KEY` and `VITE_POSTHOG_HOST` for the browser. Hosts default to `https://us.i.posthog.com`; choose your project's ingestion host. The browser key is a public project key, never a personal API key.
-
-Browser environment values are compiled into Vite output. Changing them requires a new web build; production Compose passes them as Docker build arguments. Loops secrets remain server-only. Analytics emits minimal explicit events, without emails, authentication tokens or URL query strings. Custom sinks can replace PostHog behind the same interfaces without changing feature code.
-
-The browser facade is `apps/web/src/lib/analytics.ts`; add a `ClientAnalyticsPlugin` with `analytics.use(...)` for another provider. It tracks page views and completed account/auth/organisation actions, identifies the signed-in user by internal ID, and resets identity on logout or a remote account change. Autocapture and session recording are disabled. Server hooks emit persisted account, session, organisation, member and invitation lifecycle events through `apps/server/src/modules/analytics/analytics.ts`; use `protectAnalytics` when supplying a custom sink. Provider errors do not fail account requests, and server shutdown flushes the event queue.
-
-Request logs include request ID, method, path, status and duration; body contents, credentials and query strings are excluded. `LOG_LEVEL` controls verbosity. See the [Loops transactional guide](https://app.loops.so/docs/transactional/guide) when creating the published templates.
-
-## Architecture
-
-| Folder | Responsibility |
-| --- | --- |
-| `apps/web/src/app` | Router, providers and application styling |
-| `apps/web/src/features` | Auth, account and organisation screens with feature-specific queries/forms |
-| `apps/web/src/lib` | Auth client, HTTP client, Query configuration and cache invalidation |
-| `apps/web/src/stores` | Non-sensitive UI preferences; remote data stays in TanStack Query |
-| `apps/server/src/config` | Validated environment configuration |
-| `apps/server/src/modules` | Auth, account, organisations and health logic and routes |
-| `apps/server/src/routes` | Route composition |
-| `apps/server/src/middleware` | Request logging, authentication and errors |
-| `packages/db` | Drizzle schema, PostgreSQL connection and checked-in migrations |
-| `packages/contracts` | Shared request/response schemas and DTOs |
-| `packages/ui` | Design tokens and reusable UI primitives |
-| `packages/typescript-config` | Shared compiler configuration |
-
-Add domain-specific server modules and matching web features without mixing them into authentication. Put navigable state in router URLs, server state in Query, and reusable contracts in `packages/contracts`. Change theme tokens and UI primitives to apply a different visual design.
-
-## Checks and migrations
-
-```sh
-pnpm verify
-pnpm --filter @repo/web exec playwright install chromium webkit
-pnpm test:e2e
-# Include real persistence and multi-user permission tests against a disposable DB:
-TEST_DATABASE_URL=postgresql://starter:starter@localhost:5433/starter_test pnpm test
-```
-
-Create the disposable test database and apply migrations to it before running integration tests. Integration tests skip when `TEST_DATABASE_URL` is absent. GitHub CI starts a fresh PostgreSQL database, migrates it and runs verification with integration tests enabled, then installs Chromium/WebKit and runs the browser checks. Lefthook installs through `pnpm install`; Biome handles formatting and linting.
-
-After schema changes, use `DATABASE_URL=… pnpm db:generate`, review the generated SQL, then `DATABASE_URL=… pnpm db:migrate`. Migrations belong in version control. Use `pnpm add` for dependencies. `pnpm build` produces the Vite static site and the tsdown server bundle; `pnpm --filter @repo/server start` starts the compiled server. Vite preview serves static output and does not supply the development API proxy.
-
-## Production containers
-
-`deploy/compose.yaml` runs PostgreSQL, a one-shot migration service, the compiled Hono server, and Caddy serving the SPA. Caddy proxies API, documentation and health routes before its SPA fallback, so direct visits to `/sign-in`, account pages and invitation routes work. Only Caddy exposes ports; the API and database remain on the container network.
-
-```sh
-cp deploy/.env.example deploy/.env
-# Fill in domain, database password/URL, auth secret and Loops credentials/template IDs.
-docker compose --env-file deploy/.env -f deploy/compose.yaml config
-docker compose --env-file deploy/.env -f deploy/compose.yaml up --build -d
-```
-
-Point the configured domain at this host and allow ports 80/443 for Caddy's HTTPS certificates. The database password must match the URL; URL-encode special characters. Keep backups outside the containers and protect `deploy/.env`. The server waits for successful migrations before starting. Use a single migration job when deploying multiple API replicas.
-
-The Compose network reserves `172.29.71.20` for Caddy and trusts only that proxy IP for client-IP forwarding and authentication rate limits. If that subnet conflicts with your host, change the network and `TRUSTED_PROXY_IPS` together. External proxies require their verified socket IPs in the allowlist; never trust arbitrary forwarded headers. Caddy certificate data and PostgreSQL data persist in named volumes. Do not remove those volumes when upgrading.
-
-Verify `/health/ready`, `/docs`, `/sign-in`, signup and cookie persistence on the public HTTPS origin after deploying. The Docker files are deployment templates; validate them with your host's Docker engine before a release.
+1. **Create the application repository.** Use the private GitHub template: `gh repo create my-app --private --template dougwithseismic/react-saas-starter --clone`. Enter the new folder and read `AGENTS.md`.
+2. **Install the local tools and dependencies.** Use Node.js 24+, the pnpm version pinned in `package.json`, and Docker Compose. Run `corepack enable` and `pnpm install`.
+3. **Set the application identity and local configuration.** Replace the starter name and branding. Copy `apps/server/.env.example` and `apps/web/.env.example` to `.env` files in their respective folders. Generate `BETTER_AUTH_SECRET` with `openssl rand -base64 48`. Set `DATABASE_URL`; keep `APP_ORIGIN` and `BETTER_AUTH_URL` at `http://localhost:4300`. The web app uses port 4300, Hono 4301, and local PostgreSQL 5433. Keep secrets out of Git.
+4. **Start and migrate PostgreSQL.** Run `docker compose up -d --wait`, then `DATABASE_URL=postgresql://starter:starter@localhost:5433/starter pnpm db:migrate`. Use a separate disposable database for integration tests and migrate it too. Keep schema changes and reviewed migrations in `packages/db`.
+5. **Configure Loops email.** Verify the sending domain and publish three transactional templates. Set `LOOPS_API_KEY`, `LOOPS_RESET_PASSWORD_TEMPLATE_ID`, `LOOPS_VERIFY_EMAIL_TEMPLATE_ID` and `LOOPS_INVITATION_TEMPLATE_ID` on the server. Every template needs `url` and `name`; invitations also need `organizationName`, with `name` representing the inviter. The verification template also handles email changes. Account emails do not enroll recipients in a marketing audience. Without configuration, recovery and verification cannot deliver email; manual invitation links still require a verified recipient.
+6. **Configure analytics.** Set server `POSTHOG_PROJECT_KEY` and `POSTHOG_HOST`, plus browser `VITE_POSTHOG_PROJECT_KEY` and `VITE_POSTHOG_HOST`, using the same project and its ingestion host. Browser keys must be public project keys. Browser values require a rebuild; unset keys disable analytics. For another provider, replace the sinks in `apps/web/src/lib/analytics.ts` and `apps/server/src/modules/analytics/analytics.ts` without changing feature code. Verify client and server events, user identification and logout reset.
+7. **Connect logging and monitoring.** Set `LOG_LEVEL` and connect the server's Pino JSON output to your hosting log service. Confirm request IDs, method, path, status and duration are visible. Keep credentials, request bodies and query strings out of logs. Monitor `/health/ready` and application failures.
+8. **Apply the frontend design.** Update tokens and primitives in `packages/ui`, then layouts and screens in `apps/web/src`. Keep TanStack Query for remote data, TanStack Router for navigable state, and Zustand for UI preferences. Better Auth owns authentication; Hono enforces API access. Put new server modules in `apps/server/src/modules` and shared DTOs in `packages/contracts`.
+9. **Check local account flows.** Run `pnpm dev` and open `http://localhost:4300/sign-in`. The login API is `POST /api/auth/sign-in/email`; Scalar is at `/docs` and the API specification at `/openapi.json`. Check signup, login, logout, profile updates, email verification/change, password recovery/change, session revocation and account deletion. Check organisation creation/editing/deletion, member roles, invitations and protection of the final owner.
+10. **Run the automated checks.** Run `pnpm verify`, install browsers with `pnpm --filter @repo/web exec playwright install chromium webkit`, then run `pnpm test:e2e`. Set `TEST_DATABASE_URL` to the migrated disposable database to include persistence and permission tests. Confirm GitHub Actions can run; account billing or spending limits can block jobs before they start.
+11. **Configure production hosting.** Provision the domain, PostgreSQL and application host. Copy `deploy/.env.example` to `deploy/.env` and supply the production domain, database credentials, auth secret, Loops settings and analytics settings. Keep the frontend and API on the same HTTPS origin through Caddy or an equivalent reverse proxy. Preserve the SPA fallback, run migrations before starting the API, and allow only verified proxy socket IPs in `TRUSTED_PROXY_IPS`. Keep the database private and configure backups.
+12. **Build and deploy.** Validate the configuration with `docker compose --env-file deploy/.env -f deploy/compose.yaml config`, then build and start it with `docker compose --env-file deploy/.env -f deploy/compose.yaml up --build -d`, or use your host's equivalent pipeline. Point DNS at the host and verify HTTPS. Validate the Docker templates on the deployment host; a successful local Node/Vite build does not prove container deployment. Changing browser analytics settings requires rebuilding the web image.
+13. **Verify the live application.** Check `/health/ready`, `/docs`, direct account/invitation URLs and cookie persistence. Repeat the account and organisation flows with real test users, confirm Loops email arrival and usable links, confirm PostHog events and identity reset, and confirm logs and alerts. Test database restore and the release rollback process before relying on the application.
