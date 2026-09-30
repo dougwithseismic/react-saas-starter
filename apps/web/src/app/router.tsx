@@ -5,32 +5,29 @@ import {
   createRoute,
   createRouter,
   Link,
-  lazyRouteComponent,
   Outlet,
   redirect,
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { lazy, useEffect, useRef } from "react";
 
-const AccountPage = lazyRouteComponent(
-  () => import("../features/account/page"),
-);
-const AuthForm = lazyRouteComponent(
-  () => import("../features/auth/forms"),
-  "AuthForm",
+const AccountPage = lazy(() => import("../features/account/page"));
+const AuthForm = lazy(() =>
+  import("../features/auth/forms").then((module) => ({
+    default: module.AuthForm,
+  })),
 );
 
+import { Loading } from "../components/query-state";
 import { sessionOptions } from "../features/auth/queries";
 import HomePage from "../features/home/page";
 
-const InvitationPage = lazyRouteComponent(
+const InvitationPage = lazy(
   () => import("../features/organisations/invitation"),
 );
-const OrganisationsPage = lazyRouteComponent(
-  () => import("../features/organisations/page"),
-);
+const OrganisationsPage = lazy(() => import("../features/organisations/page"));
 
 import { organisationSearch } from "../features/organisations/search";
 import { analytics, analyticsPath } from "../lib/analytics";
@@ -250,6 +247,7 @@ export const router = createRouter({
     protectedRoute.addChildren([account, organisations, invitation]),
   ]),
   defaultPreload: "intent",
+  defaultPendingComponent: Loading,
 });
 declare module "@tanstack/react-router" {
   interface Register {
