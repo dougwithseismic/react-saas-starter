@@ -2,7 +2,7 @@
 
 ## Deploy on Railway
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/DQKfXb?referralCode=dougie)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/saas-starter-with-react-hono-and-better-auth--saas-starter-with-react-hono-and-better-?referralCode=dougie)
 
 The template creates Postgres, the API and the web proxy on one private network. Only the web proxy is public, so the app and API share one HTTPS origin. It generates the auth secret for each deploy, runs migrations before each API deploy and needs no input. Email and analytics stay off until you add the Loops and PostHog variables. `deploy/RAILWAY.md` lists every service setting and variable. The button uses my Railway referral code.
 
