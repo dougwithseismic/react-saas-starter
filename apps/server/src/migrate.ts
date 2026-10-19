@@ -16,7 +16,7 @@ const folder = fileURLToPath(
 );
 try {
   await migrateDatabase(url, folder);
-  logger.info({ folder }, "Migrations applied");
+  logger.info({ folder }, "Migrations up to date");
 } catch (error) {
   // Drizzle wraps driver errors; the cause carries the connection or SQL code.
   const cause = error instanceof Error ? (error.cause ?? error) : error;
