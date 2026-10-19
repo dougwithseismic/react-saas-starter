@@ -154,8 +154,8 @@ The reliable route is to build a working project first and generate the template
 2. Add the GitHub repo as a service named `server`. Apply the settings, watch paths and variables above. Template functions only run in templates, so for this project set `BETTER_AUTH_SECRET` to the output of `openssl rand -base64 48`.
 3. Add the same repo again as a service named `web`. Apply its settings, watch paths and variables, then generate a domain with target port `8080`.
 4. Deploy and run the checks below.
-5. In the project settings, choose Generate Template from Project. In the composer, set `BETTER_AUTH_SECRET` to `${{secret(64)}}` so every deploy gets its own secret, then go through each service against the tables above. Re-enter anything the generator dropped, including plain variables, the pre-deploy command, watch paths and the domain's target port.
-6. Create the template, deploy it once into a new project and run the checks again. Put its URL in the README button.
+5. In the project settings, choose Generate Template from Project. In the composer, set `BETTER_AUTH_SECRET` to `${{secret(64)}}` to generate a secret for each deploy. Check each service against the tables above. The generator keeps references, the pre-deploy command, healthchecks, restart policies, volumes and the domain's target port. It leaves all plain variables empty and required, so re-enter their values, including the database's own. Templates omit watch paths; add them to the deployed project to rebuild only the service a push touches.
+6. Apply the changes and deploy the template into a new project to run the checks again. Add the template URL to the README button.
 
 ## Check a deploy
 

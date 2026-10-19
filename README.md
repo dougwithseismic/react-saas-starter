@@ -1,5 +1,11 @@
 # React SaaS Starter
 
+## Deploy on Railway
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/DQKfXb?referralCode=dougie)
+
+The template creates Postgres, the API and the web proxy on one private network. Only the web proxy is public, so the app and API share one HTTPS origin. It generates the auth secret for each deploy, runs migrations before each API deploy and needs no input. Email and analytics stay off until you add the Loops and PostHog variables. `deploy/RAILWAY.md` lists every service setting and variable. The button uses my Railway referral code.
+
 ## Copyable setup prompt
 
 ```text
@@ -8,7 +14,7 @@ Use this starter to set up [APP NAME] in a new private repository. Configure loc
 
 ## Setup checklist
 
-1. **Create the application repository.** Use the private GitHub template: `gh repo create my-app --private --template dougwithseismic/react-saas-starter --clone`. Enter the new folder and read `AGENTS.md`.
+1. **Create the application repository.** Use the public GitHub template to create a private repository: `gh repo create my-app --private --template dougwithseismic/react-saas-starter --clone`. Open the new folder and read `AGENTS.md`.
 2. **Install the local tools and dependencies.** Use Node.js 24+, the pnpm version pinned in `package.json`, and Docker Compose. Run `corepack enable` and `pnpm install`.
 3. **Set the application identity and local configuration.** Replace the starter name and branding. Copy `apps/server/.env.example` and `apps/web/.env.example` to `.env` files in their respective folders. Generate `BETTER_AUTH_SECRET` with `openssl rand -base64 48`. Set `DATABASE_URL`; keep `APP_ORIGIN` and `BETTER_AUTH_URL` at `http://localhost:4300`. The web app uses port 4300, Hono 4301, and local PostgreSQL 5433. Keep secrets out of Git.
 4. **Start and migrate PostgreSQL.** Run `docker compose up -d --wait`, then `DATABASE_URL=postgresql://starter:starter@localhost:5433/starter pnpm db:migrate`. Use a separate disposable database for integration tests and migrate it too. Keep schema changes and reviewed migrations in `packages/db`.
