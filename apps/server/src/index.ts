@@ -6,6 +6,7 @@ import { withClientIp } from "./lib/client-ip.js";
 import { createLogger } from "./lib/logger.js";
 import { createAnalytics } from "./modules/analytics/analytics.js";
 import { createAuth } from "./modules/auth/auth.js";
+import { missingEmailSettings } from "./modules/auth/email.js";
 
 const env = readEnvironment();
 const { db, pool } = createDatabase(env.DATABASE_URL);
@@ -32,6 +33,12 @@ const server = serve({
   port: env.PORT,
 });
 logger.info({ port: env.PORT }, "API started");
+const missingEmail = missingEmailSettings(env);
+if (missingEmail.length)
+  logger.warn(
+    { missing: missingEmail },
+    "Email delivery is not fully configured; affected password reset, verification and invitation emails will not send",
+  );
 let closing = false;
 async function shutdown() {
   if (closing) return;

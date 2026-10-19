@@ -7,6 +7,15 @@ export type TransactionalEmail = {
   name: string;
   organizationName?: string;
 };
+const emailSettings = [
+  "LOOPS_API_KEY",
+  "LOOPS_RESET_PASSWORD_TEMPLATE_ID",
+  "LOOPS_VERIFY_EMAIL_TEMPLATE_ID",
+  "LOOPS_INVITATION_TEMPLATE_ID",
+] as const;
+export function missingEmailSettings(env: Environment) {
+  return emailSettings.filter((name) => !env[name]);
+}
 export function createEmailSender(
   env: Environment,
   transport: typeof fetch = fetch,

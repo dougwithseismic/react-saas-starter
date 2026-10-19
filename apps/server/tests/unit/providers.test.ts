@@ -5,7 +5,10 @@ import {
   noopAnalytics,
   protectAnalytics,
 } from "../../src/modules/analytics/analytics.js";
-import { createEmailSender } from "../../src/modules/auth/email.js";
+import {
+  createEmailSender,
+  missingEmailSettings,
+} from "../../src/modules/auth/email.js";
 
 const env = readEnvironment({
   DATABASE_URL: "postgres://localhost/test",
@@ -88,6 +91,17 @@ test("Loops missing template and provider outage return safe failures", async ()
       message,
     ),
     /not configured/,
+  );
+});
+test("missing Loops settings are named so a bare deploy reports them", () => {
+  assert.deepEqual(missingEmailSettings(env), []);
+  assert.deepEqual(
+    missingEmailSettings({
+      ...env,
+      LOOPS_API_KEY: undefined,
+      LOOPS_INVITATION_TEMPLATE_ID: undefined,
+    }),
+    ["LOOPS_API_KEY", "LOOPS_INVITATION_TEMPLATE_ID"],
   );
 });
 test("analytics abstraction forwards semantic payloads and isolates provider failures", async () => {
