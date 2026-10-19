@@ -1,12 +1,31 @@
-{$PUBLIC_HOST} {
-  encode zstd gzip
-  @backend path /api /api/* /docs /docs/* /openapi.json /health /health/*
-  handle @backend {
-    reverse_proxy server:4301
-  }
-  handle {
-    root * /srv
-    try_files {path} /index.html
-    file_server
-  }
+# One origin for the SPA and the API, so auth cookies stay first-party.
+#
+# Compose: SITE_ADDRESS is the public host; Caddy terminates TLS and is the
+# first hop, so TRUSTED_PROXIES stays empty and the socket peer is the client.
+#
+# Railway: leave SITE_ADDRESS unset to serve plain HTTP on PORT (Railway
+# terminates TLS), point API_UPSTREAM at the server's private domain, and set
+# TRUSTED_PROXIES so the client address comes from the edge's X-Real-IP.
+{
+	http_port {$PORT:80}
+	servers {
+		trusted_proxies static {$TRUSTED_PROXIES}
+		client_ip_headers X-Real-IP
+	}
+}
+
+{$SITE_ADDRESS:http://} {
+	encode zstd gzip
+	@backend path /api /api/* /docs /docs/* /openapi.json /health /health/*
+	handle @backend {
+		reverse_proxy {$API_UPSTREAM:server:4301} {
+			# Replace any forwarded chain with the one address Caddy resolved.
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
 }
