@@ -2,7 +2,9 @@ FROM node:24-alpine AS build
 WORKDIR /workspace
 RUN corepack enable
 COPY . .
-RUN pnpm install --frozen-lockfile
+# The build context has no Git checkout, so skip lifecycle scripts such as the
+# lefthook prepare hook. Nothing below depends on an install script.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 ARG VITE_POSTHOG_PROJECT_KEY=
 ARG VITE_POSTHOG_HOST=https://us.i.posthog.com
 ENV VITE_POSTHOG_PROJECT_KEY=$VITE_POSTHOG_PROJECT_KEY

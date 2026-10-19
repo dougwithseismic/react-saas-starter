@@ -2,7 +2,9 @@ FROM node:24-alpine AS build
 WORKDIR /workspace
 RUN corepack enable
 COPY . .
-RUN pnpm install --frozen-lockfile
+# The build context has no Git checkout, so skip lifecycle scripts such as the
+# lefthook prepare hook. Nothing below depends on an install script.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 RUN pnpm --filter @repo/server build
 
 # Migration tooling is isolated from the long-running application command.
