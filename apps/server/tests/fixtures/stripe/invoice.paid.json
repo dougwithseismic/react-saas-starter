@@ -1,0 +1,49 @@
+{
+  "id": "evt_invoice_paid_{{suffix}}",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1793520002,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": { "id": null, "idempotency_key": null },
+  "type": "invoice.paid",
+  "data": {
+    "object": {
+      "id": "in_create_{{suffix}}",
+      "object": "invoice",
+      "amount_due": 1900,
+      "amount_paid": 1900,
+      "amount_remaining": 0,
+      "billing_reason": "subscription_create",
+      "collection_method": "charge_automatically",
+      "created": 1793519999,
+      "currency": "usd",
+      "customer": "cus_{{suffix}}",
+      "hosted_invoice_url": "https://invoice.stripe.com/i/acct_test/test_{{suffix}}",
+      "invoice_pdf": "https://pay.stripe.com/invoice/acct_test/test_{{suffix}}/pdf",
+      "livemode": false,
+      "number": "STARTER-0001",
+      "parent": {
+        "quote_details": null,
+        "subscription_details": {
+          "metadata": {
+            "organizationId": "{{organizationId}}",
+            "plan": "pro",
+            "userId": "{{userId}}"
+          },
+          "subscription": "sub_{{suffix}}"
+        },
+        "type": "subscription_details"
+      },
+      "status": "paid",
+      "status_transitions": {
+        "finalized_at": 1793520000,
+        "marked_uncollectible_at": null,
+        "paid_at": 1793520001,
+        "voided_at": null
+      },
+      "subtotal": 1900,
+      "total": 1900
+    }
+  }
+}

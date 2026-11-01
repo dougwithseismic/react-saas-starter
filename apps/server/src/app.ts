@@ -10,6 +10,7 @@ import { createLogger, type Logger } from "./lib/logger.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { requestLog } from "./middleware/request-log.js";
 import type { Auth } from "./modules/auth/auth.js";
+import { type Billing, createBilling } from "./modules/billing/service.js";
 import { registerDocumentation } from "./modules/docs/routes.js";
 import { apiRoutes } from "./routes/index.js";
 export function createApp(
@@ -17,6 +18,7 @@ export function createApp(
   auth: Auth,
   env: Environment,
   logger: Logger = createLogger(env),
+  billing: Billing = createBilling(db, env, { logger }),
 ) {
   const app = new OpenAPIHono<AppEnv>();
   app.use("*", requestId());
@@ -50,7 +52,7 @@ export function createApp(
     }),
   );
   app.onError(errorHandler(logger));
-  const routes = app.route("/", apiRoutes(db, auth));
+  const routes = app.route("/", apiRoutes(db, auth, billing));
   app.openAPIRegistry.registerComponent("securitySchemes", "sessionCookie", {
     type: "apiKey",
     in: "cookie",

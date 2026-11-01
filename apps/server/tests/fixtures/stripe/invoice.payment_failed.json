@@ -1,0 +1,52 @@
+{
+  "id": "evt_invoice_payment_failed_{{suffix}}",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1796198500,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": { "id": null, "idempotency_key": null },
+  "type": "invoice.payment_failed",
+  "data": {
+    "object": {
+      "id": "in_cycle_{{suffix}}",
+      "object": "invoice",
+      "amount_due": 1900,
+      "amount_paid": 0,
+      "amount_remaining": 1900,
+      "attempt_count": 1,
+      "attempted": true,
+      "billing_reason": "subscription_cycle",
+      "collection_method": "charge_automatically",
+      "created": 1796198400,
+      "currency": "usd",
+      "customer": "cus_{{suffix}}",
+      "hosted_invoice_url": "https://invoice.stripe.com/i/acct_test/test_cycle_{{suffix}}",
+      "invoice_pdf": "https://pay.stripe.com/invoice/acct_test/test_cycle_{{suffix}}/pdf",
+      "livemode": false,
+      "next_payment_attempt": 1796457600,
+      "number": "STARTER-0002",
+      "parent": {
+        "quote_details": null,
+        "subscription_details": {
+          "metadata": {
+            "organizationId": "{{organizationId}}",
+            "plan": "pro",
+            "userId": "{{userId}}"
+          },
+          "subscription": "sub_{{suffix}}"
+        },
+        "type": "subscription_details"
+      },
+      "status": "open",
+      "status_transitions": {
+        "finalized_at": 1796198460,
+        "marked_uncollectible_at": null,
+        "paid_at": null,
+        "voided_at": null
+      },
+      "subtotal": 1900,
+      "total": 1900
+    }
+  }
+}

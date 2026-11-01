@@ -170,9 +170,14 @@ test("analytics drops undeclared properties at runtime", () => {
   const unsafe = {
     organizationId: "org",
     role: "member",
+    plan: "pro",
     email: "secret@example.com",
     token: "secret",
   };
   sink.capture("organization.created", "id", unsafe);
-  assert.deepEqual(captured, { organizationId: "org", role: "member" });
+  assert.deepEqual(captured, {
+    organizationId: "org",
+    role: "member",
+    plan: "pro",
+  });
 });

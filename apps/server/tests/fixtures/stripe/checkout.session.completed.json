@@ -1,0 +1,37 @@
+{
+  "id": "evt_checkout_completed_{{suffix}}",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1793520000,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": { "id": null, "idempotency_key": null },
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_test_{{suffix}}",
+      "object": "checkout.session",
+      "amount_subtotal": 1900,
+      "amount_total": 1900,
+      "client_reference_id": "{{organizationId}}",
+      "created": 1793519940,
+      "currency": "usd",
+      "customer": "cus_{{suffix}}",
+      "expires_at": 1793606340,
+      "invoice": "in_create_{{suffix}}",
+      "livemode": false,
+      "metadata": {
+        "organizationId": "{{organizationId}}",
+        "plan": "pro",
+        "userId": "{{userId}}"
+      },
+      "mode": "subscription",
+      "payment_status": "paid",
+      "status": "complete",
+      "subscription": "sub_{{suffix}}",
+      "success_url": "http://localhost:4300/organisations/{{organizationId}}/billing?checkout=success",
+      "cancel_url": "http://localhost:4300/organisations/{{organizationId}}/billing?checkout=cancelled",
+      "url": null
+    }
+  }
+}

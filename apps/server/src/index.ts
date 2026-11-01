@@ -7,6 +7,8 @@ import { createLogger } from "./lib/logger.js";
 import { createAnalytics } from "./modules/analytics/analytics.js";
 import { createAuth } from "./modules/auth/auth.js";
 import { missingEmailSettings } from "./modules/auth/email.js";
+import { missingBillingSettings } from "./modules/billing/config.js";
+import { createBilling } from "./modules/billing/service.js";
 
 const env = readEnvironment();
 const { db, pool } = createDatabase(env.DATABASE_URL);
@@ -20,7 +22,8 @@ pool.on("error", (error) => {
   );
 });
 const analytics = createAnalytics(env, logger);
-const app = createApp(db, createAuth(db, env, analytics), env, logger);
+const billing = createBilling(db, env, { analytics, logger });
+const app = createApp(db, createAuth(db, env, analytics), env, logger, billing);
 const server = serve({
   fetch: (request, bindings) =>
     app.fetch(
@@ -39,6 +42,17 @@ if (missingEmail.length)
     { missing: missingEmail },
     "Email delivery is not fully configured; affected password reset, verification and invitation emails will not send",
   );
+const missingBilling = missingBillingSettings(env);
+if (missingBilling.length)
+  logger.warn(
+    { missing: missingBilling },
+    "Billing is switched off; set the Stripe keys to take payments",
+  );
+else if (
+  env.NODE_ENV !== "production" &&
+  /^(sk|rk)_live_/.test(env.STRIPE_SECRET_KEY ?? "")
+)
+  logger.warn("A live Stripe key is set outside production");
 let closing = false;
 async function shutdown() {
   if (closing) return;

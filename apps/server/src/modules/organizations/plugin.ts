@@ -1,8 +1,10 @@
 import { type Database, eq, schema } from "@repo/db";
+import { APIError } from "better-auth/api";
 import { organization } from "better-auth/plugins";
 import type { Environment } from "../../config/env.js";
 import { type AnalyticsSink, noopAnalytics } from "../analytics/analytics.js";
 import type { createEmailSender } from "../auth/email.js";
+import { organizationSubscriptions } from "../billing/queries.js";
 
 export function createOrganizationPlugin(
   db: Database,
@@ -68,6 +70,12 @@ export function createOrganizationPlugin(
         });
       },
       beforeDeleteOrganization: async ({ organization: org }) => {
+        // Deleting the organisation would leave Stripe charging for it.
+        if ((await organizationSubscriptions(db, org.id)).open)
+          throw new APIError("BAD_REQUEST", {
+            message:
+              "Cancel this organisation's subscription in billing before deleting it.",
+          });
         await db
           .delete(schema.organization)
           .where(eq(schema.organization.id, org.id));

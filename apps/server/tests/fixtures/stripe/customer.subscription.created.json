@@ -1,0 +1,68 @@
+{
+  "id": "evt_subscription_created_{{suffix}}",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1793520001,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": { "id": null, "idempotency_key": null },
+  "type": "customer.subscription.created",
+  "data": {
+    "object": {
+      "id": "sub_{{suffix}}",
+      "object": "subscription",
+      "billing_cycle_anchor": 1793519999,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "cancellation_details": {
+        "comment": null,
+        "feedback": null,
+        "reason": null
+      },
+      "collection_method": "charge_automatically",
+      "created": 1793519999,
+      "currency": "usd",
+      "customer": "cus_{{suffix}}",
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_{{suffix}}",
+            "object": "subscription_item",
+            "created": 1793520000,
+            "current_period_end": 1796198399,
+            "current_period_start": 1793519999,
+            "metadata": {},
+            "price": {
+              "id": "price_pro_test",
+              "object": "price",
+              "active": true,
+              "currency": "usd",
+              "product": "prod_pro_test",
+              "recurring": { "interval": "month", "interval_count": 1 },
+              "type": "recurring",
+              "unit_amount": 1900
+            },
+            "quantity": 1,
+            "subscription": "sub_{{suffix}}"
+          }
+        ],
+        "has_more": false,
+        "url": "/v1/subscription_items?subscription=sub_{{suffix}}"
+      },
+      "latest_invoice": "in_create_{{suffix}}",
+      "livemode": false,
+      "metadata": {
+        "organizationId": "{{organizationId}}",
+        "plan": "pro",
+        "userId": "{{userId}}"
+      },
+      "start_date": 1793519999,
+      "status": "active",
+      "trial_end": null,
+      "trial_start": null
+    }
+  }
+}

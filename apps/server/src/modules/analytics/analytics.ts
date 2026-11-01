@@ -16,8 +16,16 @@ export type AnalyticsEvent =
   | "organization.invitation_created"
   | "organization.invitation_accepted"
   | "organization.invitation_cancelled"
-  | "organization.invitation_rejected";
-export type AnalyticsProperties = { organizationId?: string; role?: string };
+  | "organization.invitation_rejected"
+  | "billing.checkout_started"
+  | "billing.subscribed"
+  | "billing.cancelled"
+  | "billing.payment_failed";
+export type AnalyticsProperties = {
+  organizationId?: string;
+  role?: string;
+  plan?: string;
+};
 export interface AnalyticsSink {
   capture(
     event: AnalyticsEvent,
@@ -69,6 +77,8 @@ export function protectAnalytics(
           safeProperties.organizationId = properties.organizationId;
         if (typeof properties?.role === "string")
           safeProperties.role = properties.role;
+        if (typeof properties?.plan === "string")
+          safeProperties.plan = properties.plan;
         sink.capture(
           event,
           userId,
