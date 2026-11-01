@@ -263,6 +263,13 @@ export default function OrganisationsPage() {
                 </form>
               )}
               <div className="actions">
+                <Link
+                  className="button secondary"
+                  to="/organisations/$organisationId/billing"
+                  params={{ organisationId: org.id }}
+                >
+                  Billing
+                </Link>
                 <ConfirmAction
                   title="Leave organisation?"
                   description="You will lose access. Owners must leave another owner in place."

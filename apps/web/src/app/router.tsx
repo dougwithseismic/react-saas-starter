@@ -14,6 +14,7 @@ import { Menu } from "lucide-react";
 import { lazy, useEffect, useRef } from "react";
 
 const AccountPage = lazy(() => import("../features/account/page"));
+const BillingPage = lazy(() => import("../features/billing/page"));
 const AuthForm = lazy(() =>
   import("../features/auth/forms").then((module) => ({
     default: module.AuthForm,
@@ -22,6 +23,8 @@ const AuthForm = lazy(() =>
 
 import { Loading } from "../components/query-state";
 import { sessionOptions } from "../features/auth/queries";
+import { PaymentBanner } from "../features/billing/banner";
+import { billingSearch } from "../features/billing/search";
 import HomePage from "../features/home/page";
 
 const InvitationPage = lazy(
@@ -166,6 +169,7 @@ function Protected() {
           </Button>
           <span>Account and organisation settings</span>
         </header>
+        <PaymentBanner />
         <Outlet />
       </div>
     </div>
@@ -236,6 +240,12 @@ const organisations = createRoute({
   component: OrganisationsPage,
   validateSearch: (search) => organisationSearch.parse(search),
 });
+const billing = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: "/organisations/$organisationId/billing",
+  component: BillingPage,
+  validateSearch: (search) => billingSearch.parse(search),
+});
 const invitation = createRoute({
   getParentRoute: () => protectedRoute,
   path: "/invitations/$invitationId",
@@ -244,7 +254,7 @@ const invitation = createRoute({
 export const router = createRouter({
   routeTree: root.addChildren([
     publicRoute.addChildren([home, ...authRoutes]),
-    protectedRoute.addChildren([account, organisations, invitation]),
+    protectedRoute.addChildren([account, organisations, billing, invitation]),
   ]),
   defaultPreload: "intent",
   defaultPendingComponent: Loading,

@@ -1,14 +1,15 @@
 import type { z } from "zod";
 import { ApiError } from "./auth-client";
-export async function api<T extends z.ZodType>(
+
+async function request<T extends z.ZodType>(
   path: string,
   schema: T,
-  signal?: AbortSignal,
+  init: RequestInit,
 ): Promise<z.infer<T>> {
   const response = await fetch(path, {
+    ...init,
     credentials: "include",
-    headers: { Accept: "application/json" },
-    signal,
+    headers: { Accept: "application/json", ...init.headers },
   });
   const data: unknown = await response.json();
   if (!response.ok) {
@@ -20,4 +21,22 @@ export async function api<T extends z.ZodType>(
     );
   }
   return schema.parse(data);
+}
+export function api<T extends z.ZodType>(
+  path: string,
+  schema: T,
+  signal?: AbortSignal,
+): Promise<z.infer<T>> {
+  return request(path, schema, { signal });
+}
+export function post<T extends z.ZodType>(
+  path: string,
+  schema: T,
+  body: unknown = {},
+): Promise<z.infer<T>> {
+  return request(path, schema, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }

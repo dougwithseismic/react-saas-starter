@@ -22,7 +22,8 @@ export function analyticsPath(path: string) {
   return (
     path
       .split(/[?#]/)[0]
-      ?.replace(/\/invitations\/[^/]+/, "/invitations/:id") ?? "/"
+      ?.replace(/\/invitations\/[^/]+/, "/invitations/:id")
+      .replace(/\/organisations\/[^/]+/, "/organisations/:id") ?? "/"
   );
 }
 export function createClientAnalytics(plugins: ClientAnalyticsPlugin[] = []) {

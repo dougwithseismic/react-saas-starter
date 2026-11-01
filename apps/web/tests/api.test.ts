@@ -1,6 +1,6 @@
-import { accountResponseSchema } from "@repo/contracts";
+import { accountResponseSchema, billingRedirectSchema } from "@repo/contracts";
 import { afterEach, expect, it, vi } from "vitest";
-import { api } from "../src/lib/api";
+import { api, post } from "../src/lib/api";
 
 afterEach(() => vi.unstubAllGlobals());
 it("decodes account DTOs and omits unexpected sensitive fields", async () => {
@@ -60,4 +60,30 @@ it("rejects malformed success responses instead of caching them as accounts", as
     vi.fn().mockResolvedValue(new Response("{}", { status: 200 })),
   );
   await expect(api("/api/me", accountResponseSchema)).rejects.toThrow();
+});
+it("posts JSON with the session cookie and decodes the reply", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ url: "https://checkout.stripe.com/c/pay/test" }),
+          { status: 200 },
+        ),
+      ),
+  );
+  const result = await post("/api/checkout", billingRedirectSchema, {
+    plan: "pro",
+  });
+  expect(result.url).toBe("https://checkout.stripe.com/c/pay/test");
+  expect(fetch).toHaveBeenCalledWith(
+    "/api/checkout",
+    expect.objectContaining({
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ plan: "pro" }),
+      headers: expect.objectContaining({ "Content-Type": "application/json" }),
+    }),
+  );
 });

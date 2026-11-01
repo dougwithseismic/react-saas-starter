@@ -23,6 +23,10 @@ it("drops credential properties and sensitive invitation URL state", () => {
     "/invitations/:id",
   );
   expect(analyticsPath("/reset-password?token=secret")).toBe("/reset-password");
+  expect(analyticsPath("/organisations/org-id/billing?checkout=success")).toBe(
+    "/organisations/:id/billing",
+  );
+  expect(analyticsPath("/organisations")).toBe("/organisations");
 });
 it("resets prior identity before identifying another account", () => {
   const identify = vi.fn(),
