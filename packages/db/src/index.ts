@@ -2,7 +2,18 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema/index.js";
 
-export { and, count, desc, eq, sql } from "drizzle-orm";
+export {
+  and,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNull,
+  lt,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 export { schema };
 export function createDatabase(connectionString: string) {
   const pool = new Pool({
