@@ -1,13 +1,7 @@
-import { isEntitled } from "@repo/contracts";
+import { isEntitled, isOpen } from "@repo/contracts";
 import { type Database, desc, eq, schema } from "@repo/db";
 
 export type SubscriptionRow = typeof schema.subscriptions.$inferSelect;
-
-// A subscription Stripe may still charge. Incomplete ones expire by
-// themselves, so they block neither a new checkout nor deletion.
-export function isOpen(status: string) {
-  return !["canceled", "incomplete", "incomplete_expired"].includes(status);
-}
 
 // The organisation's subscriptions, newest first, with the one that decides
 // its plan: the live one, or else the latest so the page can say what ended.

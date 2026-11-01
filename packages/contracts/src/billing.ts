@@ -34,7 +34,7 @@ export const plans = {
     id: "free",
     name: "Free",
     description: "For trying the app on your own.",
-    price: "Free",
+    price: "$0",
     trialDays: 0,
     entitlements: { seats: 1, projects: 3, features: [] },
   },
@@ -85,6 +85,12 @@ export const entitledStatuses: readonly string[] = [
 export function isEntitled(status: string) {
   return entitledStatuses.includes(status);
 }
+// A subscription Stripe may still charge. While one is open, plan changes go
+// through the Customer Portal rather than a new Checkout. Incomplete ones
+// expire by themselves.
+export function isOpen(status: string) {
+  return !["canceled", "incomplete", "incomplete_expired"].includes(status);
+}
 // True while a failed payment still matters: Stripe is retrying it, or gave
 // up and left the subscription unpaid. Not once the subscription has ended.
 export function isPaymentFailing(subscription: {
@@ -126,6 +132,8 @@ export const billingSubscriptionSchema = z.object({
   plan: planIdSchema.nullable(),
   status: z.string(),
   cancelAtPeriodEnd: z.boolean(),
+  // When a scheduled cancellation takes effect, however it was scheduled.
+  cancelAt: z.string().nullable(),
   currentPeriodEnd: z.string().nullable(),
   trialEnd: z.string().nullable(),
   endedAt: z.string().nullable(),

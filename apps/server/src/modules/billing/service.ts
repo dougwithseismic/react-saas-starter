@@ -42,6 +42,9 @@ function subscriptionDto(row: SubscriptionRow): BillingSubscription {
     plan: paidPlanIdSchema.safeParse(row.plan).data ?? null,
     status: row.status,
     cancelAtPeriodEnd: row.cancelAtPeriodEnd,
+    cancelAt: iso(
+      row.cancelAt ?? (row.cancelAtPeriodEnd ? row.currentPeriodEnd : null),
+    ),
     currentPeriodEnd: iso(row.currentPeriodEnd),
     trialEnd: iso(row.trialEnd),
     endedAt: iso(row.endedAt),
