@@ -35,7 +35,11 @@
         "LOOPS_VERIFY_EMAIL_TEMPLATE_ID",
         "LOOPS_INVITATION_TEMPLATE_ID",
         "POSTHOG_PROJECT_KEY",
-        "POSTHOG_HOST"
+        "POSTHOG_HOST",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_PRICE_PRO",
+        "STRIPE_PRICE_TEAM"
       ]
     },
     "@repo/db#build": {

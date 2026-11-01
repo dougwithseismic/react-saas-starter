@@ -76,6 +76,10 @@ Optional, left out of the template so nothing has to be typed. Add them to `serv
 | `LOOPS_INVITATION_TEMPLATE_ID` | Published Loops template for organisation invitations. |
 | `POSTHOG_PROJECT_KEY` | PostHog project key for server events. |
 | `POSTHOG_HOST` | PostHog ingestion host, for example `https://eu.i.posthog.com`. |
+| `STRIPE_SECRET_KEY` | Stripe secret or restricted key. Server only. Test mode (`sk_test_...`) until you go live. |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret (`whsec_...`) of the Stripe webhook endpoint `https://<web domain>/api/billing/webhook`. |
+| `STRIPE_PRICE_PRO` | Stripe price id for Pro. Comma separate older prices after the current one to keep their subscribers on Pro. |
+| `STRIPE_PRICE_TEAM` | Stripe price id for Team, in the same form. |
 
 ## web
 
@@ -136,15 +140,26 @@ Rate limits and session records use the client's address, so it has to survive t
 
 The server listens on `::`, so it accepts both IPv4 and IPv6 private traffic, including environments created before 16 October 2025 that are IPv6 only.
 
-## Email and analytics without configuration
+## Email, analytics and billing without configuration
 
-The server starts without Loops or PostHog and logs a warning that names the missing Loops variables.
+The server starts without Loops, PostHog or Stripe and logs a warning that names the missing Loops and Stripe variables.
 
 - Sign-up, sign-in, sign-out, sessions and organisations work.
 - Password reset answers with the usual "if this account exists" message but sends nothing. The server log shows `Email delivery is not configured`.
 - Verification and email change requests return 503 with "Email delivery is not configured. Contact your administrator."
 - Invitations are created and their links can be copied from the organisation page, but accepting one needs a verified email, so it cannot complete until Loops is configured.
 - Analytics are off in the server and the browser.
+- Billing is switched off. Every organisation is on Free, the billing page says billing is off, and the webhook answers 503.
+
+## Billing
+
+Billing needs both Stripe keys on `server`. In the Stripe dashboard, in the same mode as the key:
+
+1. Create the Pro and Team prices and set `STRIPE_PRICE_PRO` and `STRIPE_PRICE_TEAM`.
+2. Add a webhook endpoint at `https://<web domain>/api/billing/webhook` for `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` and `invoice.payment_failed`, on API version `2026-10-28.endive` (the server's Stripe SDK version). Set its signing secret as `STRIPE_WEBHOOK_SECRET`.
+3. In the Customer Portal settings, allow customers to update payment methods, cancel, and switch between the Pro and Team prices.
+
+Redeploy `server`, open an organisation's billing page and subscribe with a [test card](https://docs.stripe.com/testing). The plan shows as active once the webhook arrives; the endpoint's delivery log in Stripe shows each event answered with 200. Going live means repeating these steps with live mode keys, prices and endpoint.
 
 ## Build the template
 

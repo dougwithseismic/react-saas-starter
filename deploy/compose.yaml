@@ -46,6 +46,10 @@ services:
       LOOPS_INVITATION_TEMPLATE_ID: ${LOOPS_INVITATION_TEMPLATE_ID:-}
       POSTHOG_PROJECT_KEY: ${POSTHOG_PROJECT_KEY:-}
       POSTHOG_HOST: ${POSTHOG_HOST:-https://us.i.posthog.com}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_PRO: ${STRIPE_PRICE_PRO:-}
+      STRIPE_PRICE_TEAM: ${STRIPE_PRICE_TEAM:-}
     depends_on:
       migrate:
         condition: service_completed_successfully
